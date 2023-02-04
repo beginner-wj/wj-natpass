@@ -6,12 +6,12 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"myngrok/common"
 	"net"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
+	"wj-natpass/common"
 )
 
 var osName string
