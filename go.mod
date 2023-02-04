@@ -1,4 +1,4 @@
-module example.com/m
+module wj-natpass
 
 go 1.19
 
