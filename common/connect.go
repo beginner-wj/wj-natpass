@@ -50,14 +50,14 @@ func AddressToRemote(remoteAddress string, remoteAddress1 string, connListener C
 		if err == nil && count == 2 {
 			connListener(connremote1, connremote2)
 		}
-		forward(connremote1, connremote2)
+		Forward(connremote1, connremote2)
 	}
 }
 
 func portToRemote(port string, remoteAddress string) {
 	listener1 := listen_port("0.0.0.0:" + port)
 	for {
-		conn := accept(listener1)
+		conn := Accept(listener1)
 		if conn != nil {
 			log.Println("[+]", "start connect host:["+remoteAddress+"]")
 			conn.Close()
@@ -76,43 +76,43 @@ func connectRemoteAddressAndforward(conn net.Conn, remoteAddress string) {
 		ToastError("start connect host:[" + remoteAddress + "] fail :" + err.Error())
 		return
 	}
-	forward(connremote, conn)
+	Forward(connremote, conn)
 }
 
 func portToPort(port1 string, port2 string) {
 	listener1 := listen_port("0.0.0.0:" + port1)
 	listener2 := listen_port("0.0.0.0:" + port2)
 	for {
-		conn1 := accept(listener1)
-		conn2 := accept(listener2)
+		conn1 := Accept(listener1)
+		conn2 := Accept(listener2)
 		if conn1 == nil || conn2 == nil {
-			log.Println("[x]", "accept client faild. retry in ", timeout, " seconds. ")
+			log.Println("[x]", "Accept client faild. retry in ", timeout, " seconds. ")
 			time.Sleep(timeout * time.Second)
 			continue
 		}
-		forward(conn1, conn2)
+		Forward(conn1, conn2)
 
 		//defer conn1.Close()
 		//defer conn2.Close()
 	}
 }
 
-func forward(conn1 net.Conn, conn2 net.Conn) {
+func Forward(conn1 net.Conn, conn2 net.Conn) {
 	log.Printf("[+] start transmit. [%s],[%s] <-> [%s],[%s] \n", conn1.LocalAddr().String(), conn1.RemoteAddr().String(), conn2.LocalAddr().String(), conn2.RemoteAddr().String())
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go connCopy(conn1, conn2, &wg)
-	go connCopy(conn2, conn1, &wg)
+	go ConnCopy(conn1, conn2, &wg)
+	go ConnCopy(conn2, conn1, &wg)
 	wg.Wait()
 }
 
-func connCopy(conn1 net.Conn, conn2 net.Conn, group *sync.WaitGroup) {
+func ConnCopy(conn1 net.Conn, conn2 net.Conn, group *sync.WaitGroup) {
 	io.Copy(conn1, conn2)
 	conn1.Close()
 	group.Done()
 }
 
-func accept(listener net.Listener) net.Conn {
+func Accept(listener net.Listener) net.Conn {
 	conn, err := listener.Accept()
 	if err != nil {
 		panic("listen " + conn.LocalAddr().String() + " fail " + err.Error())
